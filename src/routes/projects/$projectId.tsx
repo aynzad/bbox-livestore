@@ -3,12 +3,12 @@ import { queryDb } from '@livestore/livestore'
 import { useQuery, useStore } from '@livestore/react'
 import { createFileRoute, useParams } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/$projectId')({
+export const Route = createFileRoute('/projects/$projectId')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { projectId } = useParams({ from: '/$projectId' })
+  const { projectId } = useParams({ from: '/projects/$projectId' })
 
   const bboxes = useQuery(
     queryDb(
@@ -43,7 +43,7 @@ function RouteComponent() {
 }
 
 function AddBboxForm() {
-  const { projectId } = useParams({ from: '/$projectId' })
+  const { projectId } = useParams({ from: '/projects/$projectId' })
   const { store } = useStore()
 
   const onBboxCreated = (x: number, y: number, width: number, height: number) =>

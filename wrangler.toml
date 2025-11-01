@@ -1,7 +1,11 @@
-name = "websocket-server"
+name = "backend-server"
 main = "./src/cf-worker/index.ts"
 compatibility_date = "2025-05-08"
 # compatibility_flags = ["nodejs_compat"]
+
+# Routes for both WebSocket and HTTPS endpoints
+# WebSocket: /ws/*
+# API: /api/*
 
 [[durable_objects.bindings]]
 name = "WEBSOCKET_SERVER"
@@ -17,5 +21,7 @@ database_name = "livestore-sync-cf-demo"
 database_id = "e149c0ac-b08e-4d3f-ac47-09349e47b649"
  
 [vars]
-# should be set via CF dashboard (as secret)
-# ADMIN_SECRET = "..."
+# For production, set via CF dashboard as secrets using: wrangler secret put <SECRET_NAME>
+# JWT_SECRET = "dev-secret-change-in-production-min-32-chars-long-please"
+# GOOGLE_CLIENT_SECRET = "your-google-client-secret" 
+# GOOGLE_CLIENT_ID = "your-google-client-id" 

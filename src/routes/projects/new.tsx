@@ -2,7 +2,7 @@ import { events } from '@/livestore/schema'
 import { useStore } from '@livestore/react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/new')({
+export const Route = createFileRoute('/projects/new')({
   component: RouteComponent,
 })
 
@@ -28,7 +28,7 @@ function RouteComponent() {
     }
 
     onProjectCreated(name)
-    navigate({ to: '/' })
+    navigate({ to: '/projects' })
   }
   return (
     <div className="flex flex-col items-center mt-10">
