@@ -25,7 +25,12 @@ export default defineConfig({
       },
     }),
     tailwindcss(),
-    livestoreDevtoolsPlugin({ schemaPath: './src/livestore/schema.ts' }),
+    livestoreDevtoolsPlugin({
+      schemaPath: [
+        './src/store/projects/projects.schema.ts',
+        './src/store/project/project.schema.ts',
+      ],
+    }),
     {
       name: 'wrangler-dev',
       configureServer: async (server) => {

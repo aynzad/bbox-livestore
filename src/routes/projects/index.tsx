@@ -1,23 +1,36 @@
-import { tables } from '@/livestore/schema'
+import { useAuthUser } from '@/store/authUser.store'
+import projectsSchema from '@/store/projects/projects.schema'
+import { projectsStoreOptions } from '@/store/projects/projects.store'
 import { queryDb } from '@livestore/livestore'
-import { useQuery } from '@livestore/react'
+import { useStore } from '@livestore/react/experimental'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/projects/')({
   component: App,
 })
 
-const visibleProjects$ = queryDb(
-  () => {
-    return tables.projects.where({
-      deletedAt: null,
-    })
-  },
-  { label: 'visibleProjects' },
-)
-
 function App() {
-  const projects = useQuery(visibleProjects$)
+  const user = useAuthUser()!
+  const projectsStore = useStore(projectsStoreOptions(user.token))
+  const userProjects = projectsStore.useQuery(
+    queryDb(
+      projectsSchema.tables.projectsUsers
+        .select('projectId')
+        .where('userId', '=', user.id),
+      { label: 'userProjects' },
+    ),
+  )
+
+  const projects = projectsStore.useQuery(
+    queryDb(
+      projectsSchema.tables.projects.where(
+        'id',
+        'IN',
+        userProjects as any, // IN operator requires string[] but types are not inferred correctly
+      ),
+      { label: 'visibleProjects', deps: userProjects },
+    ),
+  )
 
   return (
     <div>

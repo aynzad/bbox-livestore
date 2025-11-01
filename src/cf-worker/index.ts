@@ -1,5 +1,9 @@
-import { makeDurableObject, makeWorker } from '@livestore/sync-cf/cf-worker'
+import type { CfTypes } from '@livestore/sync-cf/cf-worker'
+import * as SyncBackend from '@livestore/sync-cf/cf-worker'
 import * as jose from 'jose'
+import { Schema } from '@livestore/livestore'
+
+const SyncPayload = Schema.Struct({ authToken: Schema.String })
 
 // Cloudflare Workers type definitions
 declare global {
@@ -53,12 +57,26 @@ declare global {
 }
 
 // WebSocket Durable Object for real-time sync
-export class WebSocketServer extends makeDurableObject({
-  onPush: async (message) => {
-    console.log('onPush', message.batch)
+export class SyncBackendDO extends SyncBackend.makeDurableObject({
+  onPush: async (message, context) => {
+    console.log(
+      'onPush',
+      message.batch,
+      'storeId:',
+      context.storeId,
+      'payload:',
+      context.payload,
+    )
   },
-  onPull: async (message) => {
-    console.log('onPull', message)
+  onPull: async (message, context) => {
+    console.log(
+      'onPull',
+      message,
+      'storeId:',
+      context.storeId,
+      'payload:',
+      context.payload,
+    )
   },
 }) {}
 
@@ -78,55 +96,43 @@ async function getUserFromToken(
   }
 }
 
-// Cache for initialized workers per JWT_SECRET
-const workerCache = new Map<string, ReturnType<typeof makeWorker>>()
+const validatePayload =
+  (env: Env) =>
+  async (
+    payload: typeof SyncPayload.Type | undefined,
+    context: { storeId: string },
+  ) => {
+    const authToken = payload ? payload.authToken : undefined
 
-function getOrCreateWsWorker(jwtSecret: string) {
-  if (!jwtSecret || jwtSecret.trim() === '') {
-    throw new Error('JWT_SECRET is required for WebSocket worker')
+    if (!authToken) {
+      throw new Error('No auth token provided')
+    }
+
+    const user = await getUserFromToken(authToken, env.JWT_SECRET)
+
+    if (!user) {
+      throw new Error('Invalid auth token')
+    }
+
+    // Check if token is expired
+    if (user.exp && user.exp < Date.now() / 1000) {
+      throw new Error('Token expired')
+    }
+
+    if (context.storeId.startsWith('project-')) {
+      const projectId = context.storeId.replace('project-', '')
+      // TODO: Additional checks can be added here (e.g., user roles, permissions)
+      console.log(
+        `**************** Validated access to project ${projectId} for user ${user.sub}`,
+      )
+    }
   }
-
-  // Return cached worker if exists
-  if (workerCache.has(jwtSecret)) {
-    return workerCache.get(jwtSecret)!
-  }
-
-  // Create new worker
-  const wsWorker = makeWorker({
-    validatePayload: async (payload: any) => {
-      const { authToken } = payload
-
-      if (!authToken) {
-        throw new Error('No auth token provided')
-      }
-
-      const user = await getUserFromToken(authToken, jwtSecret)
-
-      if (!user) {
-        throw new Error('Invalid auth token')
-      }
-
-      // Check if token is expired
-      if (user.exp && user.exp < Date.now() / 1000) {
-        throw new Error('Token expired')
-      }
-    },
-    enableCORS: true,
-  })
-
-  // Cache the worker
-  workerCache.set(jwtSecret, wsWorker)
-  return wsWorker
-}
 
 // HTTPS Backend API Handler
 interface Env {
-  WEBSOCKET_SERVER: DurableObjectNamespace<WebSocketServer>
-  DB: D1Database
   JWT_SECRET: string
-  ADMIN_SECRET: string
-  GOOGLE_CLIENT_ID?: string
-  GOOGLE_CLIENT_SECRET?: string
+  GOOGLE_CLIENT_ID: string
+  GOOGLE_CLIENT_SECRET: string
 }
 
 // Helper function for CORS headers
@@ -157,10 +163,10 @@ function jsonResponse(
 // Main worker export - handles both WebSocket and HTTP
 export default {
   async fetch(
-    request: Request,
+    request: CfTypes.Request,
     env: Env,
-    ctx: ExecutionContext,
-  ): Promise<Response> {
+    ctx: CfTypes.ExecutionContext,
+  ) {
     const url = new URL(request.url)
 
     // Handle CORS preflight
@@ -175,22 +181,18 @@ export default {
       url.pathname.startsWith('/ws') ||
       request.headers.get('Upgrade') === 'websocket'
     ) {
-      // Check if JWT_SECRET is configured for WebSocket auth
-      if (!env.JWT_SECRET || env.JWT_SECRET.trim() === '') {
-        console.error('JWT_SECRET not configured for WebSocket connection')
-        return jsonResponse(
-          { error: 'Server authentication not configured' },
-          500,
-        )
+      const searchParams = SyncBackend.matchSyncRequest(request)
+      if (searchParams !== undefined) {
+        return SyncBackend.handleSyncRequest({
+          request,
+          searchParams,
+          ctx,
+          syncBackendBinding: 'SYNC_BACKEND_DO',
+          syncPayloadSchema: SyncPayload,
+          validatePayload: validatePayload(env),
+        })
       }
-
-      try {
-        const wsWorker = getOrCreateWsWorker(env.JWT_SECRET)
-        return wsWorker.fetch(request, env, ctx)
-      } catch (error: any) {
-        console.error('WebSocket worker error:', error)
-        return jsonResponse({ error: 'WebSocket connection failed' }, 500)
-      }
+      return new Response('Not Found', { status: 404 })
     }
 
     // Handle HTTP API endpoints
@@ -216,7 +218,7 @@ export default {
 
 // API Request Handler
 async function handleApiRequest(
-  request: Request,
+  request: CfTypes.Request,
   env: Env,
   url: URL,
 ): Promise<Response> {
@@ -264,9 +266,12 @@ async function verifyGoogleIdToken(
 }
 
 // Login Handler - Verifies idToken and returns JWT
-async function handleLogin(request: Request, env: Env): Promise<Response> {
+async function handleLogin(
+  request: CfTypes.Request,
+  env: Env,
+): Promise<Response> {
   try {
-    const body = await request.json()
+    const body = await request.json<{ idToken: string }>()
     const { idToken } = body
 
     if (!idToken) {
@@ -316,6 +321,8 @@ async function handleLogin(request: Request, env: Env): Promise<Response> {
     if (!userInfo.email_verified) {
       return jsonResponse({ error: 'Email not verified' }, 401)
     }
+
+    // TODO: store user info in database if needed
 
     // Generate our own JWT token
     const secret = new TextEncoder().encode(env.JWT_SECRET)

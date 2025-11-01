@@ -2,8 +2,10 @@ import { Link } from '@tanstack/react-router'
 
 import { useState } from 'react'
 import { Home, Menu, X } from 'lucide-react'
+import { useAuthUser } from '@/store/authUser.store'
 
 export default function Header() {
+  const authUser = useAuthUser()
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -25,6 +27,7 @@ export default function Header() {
             />
           </Link>
         </h1>
+        {authUser && <div className="p-2 text-sm"> {authUser.name}</div>}
       </header>
 
       <aside
@@ -56,10 +59,6 @@ export default function Header() {
             <Home size={20} />
             <span className="font-medium">Home</span>
           </Link>
-
-          {/* Demo Links Start */}
-
-          {/* Demo Links End */}
         </nav>
       </aside>
     </>

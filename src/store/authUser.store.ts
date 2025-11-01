@@ -31,6 +31,8 @@ export const useAuthUser = () =>
 export const isAuthUserAuthenticated = () =>
   useAuthUserStore.getState().user !== null
 
+export const getAuthUser = () => useAuthUserStore.getState().user
+
 // Actions
 export const setAuthUser = (user: UserInfo) =>
   useAuthUserStore.setState({ user })

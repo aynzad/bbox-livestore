@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { CredentialResponse } from '@react-oauth/google'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { resetAuthUserStore, setAuthUser } from '@/store/authUser.store'
+import { projectsStoreOptions } from '@/store/projects/projects.store'
+import projectsSchema from '@/store/projects/projects.schema'
 
 export const Route = createFileRoute('/login')({
   component: RouteComponent,
@@ -11,6 +13,7 @@ export const Route = createFileRoute('/login')({
 })
 
 function RouteComponent() {
+  const { storeRegistry } = Route.useRouteContext()
   const navigate = useNavigate()
 
   const login = ({ token }: { token: string }) => {
@@ -19,9 +22,22 @@ function RouteComponent() {
       body: JSON.stringify({ idToken: token }),
     })
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         if (data.user) {
           setAuthUser({ ...data.user, token: data.token })
+          const projectsStore = await storeRegistry.getOrLoad(
+            projectsStoreOptions(data.token),
+          )
+
+          // TODO: should be done on server side
+          projectsStore.commit(
+            projectsSchema.events.createUser({
+              id: data.user.id,
+              email: data.user.email,
+              name: data.user.name,
+            }),
+          )
+
           navigate({ to: '/' })
         } else {
           console.error(data.error)

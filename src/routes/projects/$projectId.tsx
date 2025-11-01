@@ -1,20 +1,84 @@
-import { events, tables } from '@/livestore/schema'
+import { ErrorFallback } from '@/components/ErrorFallback'
+import {
+  getAuthUser,
+  isAuthUserAuthenticated,
+  useAuthUser,
+} from '@/store/authUser.store'
+import projectSchema from '@/store/project/project.schema'
+import { projectStoreOptions } from '@/store/project/project.store'
+import projectsSchema from '@/store/projects/projects.schema'
+import { projectsStoreOptions } from '@/store/projects/projects.store'
 import { queryDb } from '@livestore/livestore'
-import { useQuery, useStore } from '@livestore/react'
-import { createFileRoute, useParams } from '@tanstack/react-router'
+import { useStore } from '@livestore/react/experimental'
+import { StoreRegistryProvider } from '@livestore/react/experimental'
+import { createFileRoute, redirect, useParams } from '@tanstack/react-router'
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
 
 export const Route = createFileRoute('/projects/$projectId')({
+  loader: async ({ context, params }) => {
+    const authUser = getAuthUser()
+    if (!authUser || !authUser.token) {
+      throw redirect({
+        to: '/login',
+      })
+    }
+
+    await context.storeRegistry.preload(
+      projectStoreOptions(params.projectId, authUser.token),
+    )
+
+    const projectsStore = await context.storeRegistry.getOrLoad(
+      projectsStoreOptions(authUser.token),
+    )
+
+    const projectUser = projectsStore.query(
+      projectsSchema.tables.projectsUsers.where({
+        projectId: params.projectId,
+        userId: authUser.id,
+      }),
+    )
+
+    if (!projectUser || projectUser.length === 0) {
+      throw redirect({
+        to: '/projects',
+      })
+    }
+  },
+  beforeLoad: () => {
+    if (!isAuthUserAuthenticated()) {
+      throw redirect({
+        to: '/login',
+      })
+    }
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { projectId } = useParams({ from: '/projects/$projectId' })
+  const { storeRegistry } = Route.useRouteContext()
 
-  const bboxes = useQuery(
+  return (
+    <StoreRegistryProvider storeRegistry={storeRegistry}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense fallback={<div className="loading">Loading store…</div>}>
+          <InnerComponent />
+        </Suspense>
+      </ErrorBoundary>
+    </StoreRegistryProvider>
+  )
+}
+
+function InnerComponent() {
+  const { projectId } = useParams({ from: '/projects/$projectId' })
+  const user = useAuthUser()!
+  const projectStore = useStore(projectStoreOptions(projectId, user.token))
+
+  const bboxes = projectStore.useQuery(
     queryDb(
       () => {
-        return tables.bboxes.where({
-          projectId,
+        return projectSchema.tables.bboxes.where({
+          deletedAt: null,
         })
       },
       { label: `visibleBboxes-${projectId}`, deps: [projectId] },
@@ -44,13 +108,14 @@ function RouteComponent() {
 
 function AddBboxForm() {
   const { projectId } = useParams({ from: '/projects/$projectId' })
-  const { store } = useStore()
+  const user = useAuthUser()!
+
+  const projectStore = useStore(projectStoreOptions(projectId, user.token))
 
   const onBboxCreated = (x: number, y: number, width: number, height: number) =>
-    store.commit(
-      events.bboxCreated({
+    projectStore.commit(
+      projectSchema.events.createBbox({
         id: crypto.randomUUID(),
-        projectId,
         x,
         y,
         width,

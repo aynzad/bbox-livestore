@@ -1,25 +1,52 @@
-name = "backend-server"
+name = "example-web-todomvc-sync-cf"
 main = "./src/cf-worker/index.ts"
 compatibility_date = "2025-05-08"
-# compatibility_flags = ["nodejs_compat"]
-
-# Routes for both WebSocket and HTTPS endpoints
-# WebSocket: /ws/*
-# API: /api/*
+compatibility_flags = [
+  "enable_request_signal",
+  "nodejs_compat",
+]
 
 [[durable_objects.bindings]]
-name = "WEBSOCKET_SERVER"
-class_name = "WebSocketServer"
+name = "SYNC_BACKEND_DO"
+class_name = "SyncBackendDO"
 
 [[migrations]]
 tag = "v1"
-new_sqlite_classes = ["WebSocketServer"]
+new_sqlite_classes = ["SyncBackendDO"]
 
-[[d1_databases]]
-binding = "DB"
-database_name = "livestore-sync-cf-demo"
-database_id = "e149c0ac-b08e-4d3f-ac47-09349e47b649"
- 
+[env.prod]
+name = "example-web-todomvc-sync-cf"
+
+[[env.prod.durable_objects.bindings]]
+name = "SYNC_BACKEND_DO"
+class_name = "SyncBackendDO"
+
+[[env.prod.migrations]]
+tag = "v1"
+new_sqlite_classes = ["SyncBackendDO"]
+
+[env.preview]
+name = "example-web-todomvc-sync-cf-preview"
+
+[[env.preview.durable_objects.bindings]]
+name = "SYNC_BACKEND_DO"
+class_name = "SyncBackendDO"
+
+[[env.preview.migrations]]
+tag = "v1"
+new_sqlite_classes = ["SyncBackendDO"]
+
+[env.dev]
+name = "example-web-todomvc-sync-cf-dev"
+
+[[env.dev.durable_objects.bindings]]
+name = "SYNC_BACKEND_DO"
+class_name = "SyncBackendDO"
+
+[[env.dev.migrations]]
+tag = "v1"
+new_sqlite_classes = ["SyncBackendDO"]
+
 [vars]
 # For production, set via CF dashboard as secrets using: wrangler secret put <SECRET_NAME>
 # JWT_SECRET = "dev-secret-change-in-production-min-32-chars-long-please"

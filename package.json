@@ -12,12 +12,12 @@
     "check": "prettier --write . && eslint --fix"
   },
   "dependencies": {
-    "@livestore/adapter-web": "^0.3.1",
-    "@livestore/livestore": "^0.3.1",
-    "@livestore/peer-deps": "^0.3.1",
-    "@livestore/react": "^0.3.1",
-    "@livestore/sync-cf": "^0.3.1",
-    "@livestore/wa-sqlite": "^1.0.5",
+    "@livestore/adapter-web": "0.4.0-dev.16",
+    "@livestore/livestore": "0.4.0-dev.16",
+    "@livestore/peer-deps": "0.4.0-dev.16",
+    "@livestore/react": "0.4.0-dev.16",
+    "@livestore/sync-cf": "0.4.0-dev.16",
+    "@livestore/wa-sqlite": "0.4.0-dev.16",
     "@react-oauth/google": "^0.12.2",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",
@@ -31,6 +31,7 @@
     "lucide-react": "^0.544.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-error-boundary": "^6.0.0",
     "react-konva": "^19.2.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.6",
@@ -38,7 +39,7 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@livestore/devtools-vite": "^0.3.1",
+    "@livestore/devtools-vite": "0.4.0-dev.16",
     "@tanstack/eslint-config": "^0.3.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",

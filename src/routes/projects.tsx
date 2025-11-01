@@ -1,11 +1,22 @@
-import { adapter } from '@/livestore/adopter'
-import { schema } from '@/livestore/schema'
-import { isAuthUserAuthenticated, useAuthUser } from '@/store/authUser.store'
-import { LiveStoreProvider } from '@livestore/react'
+import { getAuthUser, isAuthUserAuthenticated } from '@/store/authUser.store'
+import { projectsStoreOptions } from '@/store/projects/projects.store'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { unstable_batchedUpdates as batchUpdates } from 'react-dom'
+import { ErrorFallback } from '@/components/ErrorFallback'
+import { Suspense } from 'react'
+import { ErrorBoundary } from 'react-error-boundary'
+import { StoreRegistryProvider } from '@livestore/react/experimental'
 
 export const Route = createFileRoute('/projects')({
+  loader: ({ context }) => {
+    const authUser = getAuthUser()
+    if (!authUser || !authUser.token) {
+      throw redirect({
+        to: '/login',
+      })
+    }
+
+    context.storeRegistry.preload(projectsStoreOptions(authUser.token))
+  },
   beforeLoad: () => {
     if (!isAuthUserAuthenticated()) {
       throw redirect({
@@ -14,19 +25,16 @@ export const Route = createFileRoute('/projects')({
     }
   },
   component: () => {
-    const authUser = useAuthUser()
+    const { storeRegistry } = Route.useRouteContext()
 
     return (
-      <LiveStoreProvider
-        schema={schema}
-        adapter={adapter}
-        renderLoading={(_) => <div>Loading LiveStore ({_.stage})...</div>}
-        batchUpdates={batchUpdates}
-        syncPayload={authUser ? { authToken: authUser.token } : undefined}
-        storeId="synced-bbox-livestore-3"
-      >
-        <Outlet />
-      </LiveStoreProvider>
+      <StoreRegistryProvider storeRegistry={storeRegistry}>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <Suspense fallback={<div className="loading">Loading store…</div>}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
+      </StoreRegistryProvider>
     )
   },
 })

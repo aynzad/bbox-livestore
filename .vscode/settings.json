@@ -8,5 +8,5 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
   },
-  "cSpell.words": ["bboxes", "materializers"]
+  "cSpell.words": ["bboxes", "materializers", "Upserted"]
 }
