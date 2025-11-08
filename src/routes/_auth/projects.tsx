@@ -1,12 +1,12 @@
 import { getAuthUser, isAuthUserAuthenticated } from '@/store/authUser.store'
 import { projectsStoreOptions } from '@/store/projects/projects.store'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { ErrorFallback } from '@/components/ErrorFallback'
+import { ErrorFallback } from '@/components/errorFallback/ErrorFallback'
 import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { StoreRegistryProvider } from '@livestore/react/experimental'
 
-export const Route = createFileRoute('/projects')({
+export const Route = createFileRoute('/_auth/projects')({
   loader: ({ context }) => {
     const authUser = getAuthUser()
     if (!authUser || !authUser.token) {
