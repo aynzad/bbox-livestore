@@ -1,4 +1,4 @@
-# Synced Bbox Livestore!
+# Bbox Livestore!
 
 ## Stack
 

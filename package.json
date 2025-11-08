@@ -1,6 +1,7 @@
 {
-  "name": "synced-bbox-livestore",
+  "name": "bbox-livestore",
   "private": true,
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
