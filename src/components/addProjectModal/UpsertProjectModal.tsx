@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import projectsSchema from '@/store/projects/projects.schema'
 import { useAuthUser } from '@/store/authUser.store'
 import { useStore } from '@livestore/react/experimental'
 import { projectsStoreOptions } from '@/store/projects/projects.store'
+import { queryDb } from '@livestore/livestore'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -15,22 +16,57 @@ import {
   ModalHeader,
   ModalTitle,
 } from '@/components/ui/modal'
+import type { ProjectWithCollaborators } from '../projectCard/ProjectCard'
 
-interface AddProjectModalProps {
+interface UpsertProjectModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  project?: ProjectWithCollaborators
 }
 
-export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
+export function UpsertProjectModal({
+  open,
+  onOpenChange,
+  project,
+}: UpsertProjectModalProps) {
+  if (!open) return null
+
+  return (
+    <UpsertProjectModalInner
+      open
+      onOpenChange={onOpenChange}
+      project={project}
+    />
+  )
+}
+
+function UpsertProjectModalInner({
+  open,
+  onOpenChange,
+  project,
+}: UpsertProjectModalProps) {
   const user = useAuthUser()!
   const projectsStore = useStore(projectsStoreOptions(user.token))
+
+  const isEditMode = !!project
+
+  const adminId =
+    project?.collaborators.find((collaborator) => collaborator.isAdmin)
+      ?.userId || user.id
   const users = projectsStore.useQuery(
-    projectsSchema.tables.users.where('id', '!=', user.id),
+    queryDb(
+      isEditMode
+        ? projectsSchema.tables.users
+        : projectsSchema.tables.users.where('id', '!=', user.id),
+      {
+        deps: [user?.id, isEditMode ? 'edit' : 'create'],
+      },
+    ),
   )
 
-  const [projectName, setProjectName] = useState('')
+  const [projectName, setProjectName] = useState(project?.name || '')
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>(
-    [],
+    project?.collaborators.map((collaborator) => collaborator.userId) || [],
   )
 
   const onProjectCreated = (name: string, collaborators: string[]) => {
@@ -44,6 +80,47 @@ export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
     )
   }
 
+  const onProjectUpdated = (
+    id: string,
+    name: string,
+    collaborators: string[],
+  ) => {
+    projectsStore.commit(
+      projectsSchema.events.updateProject({
+        id,
+        name,
+      }),
+    )
+
+    const allCollaborators =
+      project?.collaborators.map((collaborator) => collaborator.userId) || []
+
+    // Remove collaborators that are no longer selected and not the admin
+    const toRemove = allCollaborators.filter(
+      (id) => !collaborators.includes(id) && id !== adminId,
+    )
+    toRemove.forEach((userId) => {
+      projectsStore.commit(
+        projectsSchema.events.removeUserFromProject({
+          userId,
+          projectId: id,
+        }),
+      )
+    })
+
+    // Add new collaborators
+    const toAdd = collaborators.filter((id) => !allCollaborators.includes(id))
+    toAdd.forEach((userId) => {
+      projectsStore.commit(
+        projectsSchema.events.addUserToProject({
+          userId,
+          projectId: id,
+          isAdmin: false,
+        }),
+      )
+    })
+  }
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -51,7 +128,12 @@ export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
       return
     }
 
-    onProjectCreated(projectName.trim(), selectedCollaborators)
+    if (isEditMode && project) {
+      onProjectUpdated(project.id, projectName.trim(), selectedCollaborators)
+    } else {
+      onProjectCreated(projectName.trim(), selectedCollaborators)
+    }
+
     // Reset form
     setProjectName('')
     setSelectedCollaborators([])
@@ -69,7 +151,8 @@ export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
   }
 
   const collaboratorOptions = users.map((user) => ({
-    label: `${user.name} (${user.email})`,
+    label: `${user.name} ${user.id === adminId ? '*' : ''}`,
+    description: `${user.email} ${user.id === adminId ? '(Admin)' : ''}`,
     value: user.id,
   }))
 
@@ -77,9 +160,13 @@ export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
     <Modal open={open} onOpenChange={handleOpenChange}>
       <ModalContent className="sm:max-w-[500px]">
         <ModalHeader>
-          <ModalTitle>Create New Project</ModalTitle>
+          <ModalTitle>
+            {isEditMode ? 'Edit Project' : 'Create New Project'}
+          </ModalTitle>
           <ModalDescription>
-            Enter a name for your project and select collaborators.
+            {isEditMode
+              ? 'Update your project name and collaborators.'
+              : 'Enter a name for your project and select collaborators.'}
           </ModalDescription>
         </ModalHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -113,7 +200,9 @@ export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
             >
               Cancel
             </Button>
-            <Button type="submit">Create Project</Button>
+            <Button type="submit">
+              {isEditMode ? 'Update Project' : 'Create Project'}
+            </Button>
           </ModalFooter>
         </form>
       </ModalContent>

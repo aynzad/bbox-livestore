@@ -45,7 +45,7 @@ function ProjectsPage() {
 
 function ProjectsPageSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Skeleton className="h-9 w-48" />
@@ -55,7 +55,7 @@ function ProjectsPageSkeleton() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
+        {Array.from({ length: 7 }).map((_, i) => (
           <Card key={i} className="h-full">
             <CardHeader>
               <div className="flex items-center gap-3">
