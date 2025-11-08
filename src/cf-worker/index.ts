@@ -66,7 +66,7 @@ export class SyncBackendDO extends SyncBackend.makeDurableObject({
       storeId: context.storeId,
     })
   },
-  onPull: async (message, context) => {
+  onPull: async (_message, context) => {
     // Minimal logging - payload intentionally omitted to avoid logging sensitive data
     // In production, consider removing or using structured logging service
     console.log('onPull', {
