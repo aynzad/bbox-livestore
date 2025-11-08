@@ -59,24 +59,19 @@ declare global {
 // WebSocket Durable Object for real-time sync
 export class SyncBackendDO extends SyncBackend.makeDurableObject({
   onPush: async (message, context) => {
-    console.log(
-      'onPush',
-      message.batch,
-      'storeId:',
-      context.storeId,
-      'payload:',
-      context.payload,
-    )
+    // Minimal logging - payload intentionally omitted to avoid logging sensitive data
+    // In production, consider removing or using structured logging service
+    console.log('onPush', {
+      batch: message.batch,
+      storeId: context.storeId,
+    })
   },
   onPull: async (message, context) => {
-    console.log(
-      'onPull',
-      message,
-      'storeId:',
-      context.storeId,
-      'payload:',
-      context.payload,
-    )
+    // Minimal logging - payload intentionally omitted to avoid logging sensitive data
+    // In production, consider removing or using structured logging service
+    console.log('onPull', {
+      storeId: context.storeId,
+    })
   },
 }) {}
 
@@ -92,7 +87,11 @@ async function getUserFromToken(
     )
     return payload
   } catch (error) {
-    console.log('⚠️ Error verifying token', error)
+    // Log error without exposing token details
+    console.error(
+      'Error verifying token:',
+      error instanceof Error ? error.message : 'Unknown error',
+    )
   }
 }
 
@@ -122,9 +121,9 @@ const validatePayload =
     if (context.storeId.startsWith('project-')) {
       const projectId = context.storeId.replace('project-', '')
       // TODO: Additional checks can be added here (e.g., user roles, permissions)
-      console.log(
-        `**************** Validated access to project ${projectId} for user ${user.sub}`,
-      )
+      // Logging user access - consider using structured logging in production
+      // and ensure logs don't contain sensitive information
+      console.log(`Validated access to project ${projectId}`)
     }
   }
 
