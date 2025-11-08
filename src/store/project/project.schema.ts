@@ -32,10 +32,9 @@ const tables = {
   uiState: State.SQLite.clientDocument({
     name: 'uiState',
     schema: Schema.Struct({
-      newTodoText: Schema.String,
-      filter: Schema.Literal('all', 'active', 'completed'),
+      query: Schema.String,
     }),
-    default: { id: SessionIdSymbol, value: { newTodoText: '', filter: 'all' } },
+    default: { id: SessionIdSymbol, value: { query: '' } },
   }),
 }
 
