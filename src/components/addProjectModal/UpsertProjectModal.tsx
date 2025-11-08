@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import projectsSchema from '@/store/projects/projects.schema'
 import { useAuthUser } from '@/store/authUser.store'
 import { useStore } from '@livestore/react/experimental'
