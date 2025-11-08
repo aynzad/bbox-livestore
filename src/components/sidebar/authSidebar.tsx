@@ -28,10 +28,10 @@ export function AuthSidebar() {
       .slice(0, 2) || 'U'
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <div className="flex items-center gap-2 px-2 py-1 group-data-[collapsible=icon]:-translate-x-2 transition-transform duration-200 ease-linear">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
             <FolderKanban className="h-4 w-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
@@ -51,6 +51,7 @@ export function AuthSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={location.pathname.startsWith('/projects')}
+                  tooltip="Projects"
                 >
                   <Link to="/projects">
                     <FolderKanban />
@@ -69,13 +70,14 @@ export function AuthSidebar() {
               size="lg"
               asChild
               isActive={location.pathname === '/profile'}
+              tooltip={user?.name || 'Profile'}
             >
               <Link to="/profile">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-8 w-8 shrink-0">
                   <AvatarImage src={user?.image} alt={user?.name} />
                   <AvatarFallback>{userInitials}</AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid flex-1 text-left text-sm leading-tight min-w-0 group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">
                     {user?.name || 'User'}
                   </span>

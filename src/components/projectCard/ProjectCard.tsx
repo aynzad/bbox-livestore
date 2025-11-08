@@ -16,7 +16,7 @@ export function ProjectCard({ id, name, className }: ProjectCardProps) {
       params={{ projectId: id }}
       className={cn('block transition-transform hover:scale-[1.02]', className)}
     >
-      <Card className="h-full cursor-pointer transition-colors hover:border-primary/50 hover:shadow-md">
+      <Card className="h-full cursor-pointer transition-all hover:border-primary/50">
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -32,4 +32,3 @@ export function ProjectCard({ id, name, className }: ProjectCardProps) {
     </Link>
   )
 }
-

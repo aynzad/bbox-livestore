@@ -5,6 +5,8 @@ import { ErrorFallback } from '@/components/errorFallback/ErrorFallback'
 import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { StoreRegistryProvider } from '@livestore/react/experimental'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
 
 export const Route = createFileRoute('/_auth/projects')({
   loader: ({ context }) => {
@@ -24,17 +26,49 @@ export const Route = createFileRoute('/_auth/projects')({
       })
     }
   },
-  component: () => {
-    const { storeRegistry } = Route.useRouteContext()
-
-    return (
-      <StoreRegistryProvider storeRegistry={storeRegistry}>
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <Suspense fallback={<div className="loading">Loading store…</div>}>
-            <Outlet />
-          </Suspense>
-        </ErrorBoundary>
-      </StoreRegistryProvider>
-    )
-  },
+  component: ProjectsPage,
 })
+
+function ProjectsPage() {
+  const { storeRegistry } = Route.useRouteContext()
+
+  return (
+    <StoreRegistryProvider storeRegistry={storeRegistry}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense fallback={<ProjectsPageSkeleton />}>
+          <Outlet />
+        </Suspense>
+      </ErrorBoundary>
+    </StoreRegistryProvider>
+  )
+}
+
+function ProjectsPageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-5 w-64" />
+        </div>
+        <Skeleton className="h-10 w-32" />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Card key={i} className="h-full">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-6 flex-1" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-4 w-32" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}

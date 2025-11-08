@@ -13,6 +13,7 @@ import { queryDb } from '@livestore/livestore'
 import { useStore } from '@livestore/react/experimental'
 import { StoreRegistryProvider } from '@livestore/react/experimental'
 import { createFileRoute, redirect, useParams } from '@tanstack/react-router'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Suspense } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -62,7 +63,7 @@ function RouteComponent() {
   return (
     <StoreRegistryProvider storeRegistry={storeRegistry}>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <Suspense fallback={<div className="loading">Loading store…</div>}>
+        <Suspense fallback={<ProjectEditorSkeleton />}>
           <InnerComponent />
         </Suspense>
       </ErrorBoundary>
@@ -150,6 +151,28 @@ function InnerComponent() {
         onUpdate={handleUpdate}
         onRemove={handleRemove}
       />
+    </div>
+  )
+}
+
+function ProjectEditorSkeleton() {
+  return (
+    <div className="flex flex-col h-full w-full">
+      {/* Toolbar skeleton */}
+      <div className="flex items-center gap-2 p-2 border-b bg-background">
+        <Skeleton className="h-9 w-20" />
+        <Skeleton className="h-9 w-20" />
+        <Skeleton className="h-9 w-20" />
+        <Skeleton className="w-px h-6 mx-1" />
+        <Skeleton className="h-9 w-9" />
+        <Skeleton className="h-9 w-9" />
+        <Skeleton className="h-9 w-20" />
+      </div>
+
+      {/* Canvas area skeleton */}
+      <div className="flex-1 overflow-hidden bg-muted/20 w-full h-full">
+        <Skeleton className="h-full w-full" />
+      </div>
     </div>
   )
 }

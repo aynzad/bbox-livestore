@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useEditorStore } from './editor.store'
 
 interface UseCanvasInteractionsProps {
@@ -38,6 +38,9 @@ export function useCanvasInteractions({
   const setIsPanning = useEditorStore((state) => state.setIsPanning)
   const setPanStart = useEditorStore((state) => state.setPanStart)
 
+  // Track space key state for cursor updates and panning
+  const [isSpacePressed, setIsSpacePressed] = useState(false)
+
   const handleStageMouseDown = useCallback(
     (e: any) => {
       const stage = e.target.getStage()
@@ -46,6 +49,13 @@ export function useCanvasInteractions({
       // Transform pointer position to account for zoom and pan
       const x = (pointerPos.x - position.x) / scale
       const y = (pointerPos.y - position.y) / scale
+
+      // Temporary pan with Space key (takes priority)
+      if (isSpacePressed) {
+        setIsPanning(true)
+        setPanStart(pointerPos)
+        return
+      }
 
       if (tool === 'pan') {
         setIsPanning(true)
@@ -85,6 +95,7 @@ export function useCanvasInteractions({
       setDrawStart,
       setTempBbox,
       setSelectedId,
+      isSpacePressed,
     ],
   )
 
@@ -93,15 +104,24 @@ export function useCanvasInteractions({
       const stage = e.target.getStage()
       const pointerPos = stage.getPointerPosition()
 
-      if (isPanning && panStart && tool === 'pan') {
-        const dx = pointerPos.x - panStart.x
-        const dy = pointerPos.y - panStart.y
-        setPosition({
-          x: position.x + dx,
-          y: position.y + dy,
-        })
-        setPanStart(pointerPos)
-        return
+      // Handle panning (either from pan tool or temporary space pan)
+      // Only continue panning if it was already started (via mouse down)
+      if (isPanning && panStart) {
+        // Check if we should continue panning (pan tool or space still pressed)
+        if (tool === 'pan' || isSpacePressed) {
+          const dx = pointerPos.x - panStart.x
+          const dy = pointerPos.y - panStart.y
+          setPosition({
+            x: position.x + dx,
+            y: position.y + dy,
+          })
+          setPanStart(pointerPos)
+          return
+        } else {
+          // Space was released, stop panning
+          setIsPanning(false)
+          setPanStart(null)
+        }
       }
 
       if (isDrawing && drawStart && tool === 'bbox') {
@@ -126,10 +146,12 @@ export function useCanvasInteractions({
       position,
       setPosition,
       setPanStart,
+      setIsPanning,
       isDrawing,
       drawStart,
       scale,
       setTempBbox,
+      isSpacePressed,
     ],
   )
 
@@ -208,12 +230,41 @@ export function useCanvasInteractions({
     [onUpdate],
   )
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault() // Prevent page scrolling
+        setIsSpacePressed(true)
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault()
+        setIsSpacePressed(false)
+        // If panning with space and space is released, stop panning
+        if (isPanning && tool !== 'pan') {
+          setIsPanning(false)
+          setPanStart(null)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [isPanning, tool, setIsPanning, setPanStart])
+
   const getCursor = useCallback(() => {
     if (isPanning) return 'grabbing'
+    if (isSpacePressed) return 'grab'
     if (tool === 'pan') return 'grab'
     if (tool === 'bbox') return 'crosshair'
     return 'default'
-  }, [isPanning, tool])
+  }, [isPanning, isSpacePressed, tool])
 
   return {
     tempBbox,
@@ -223,5 +274,6 @@ export function useCanvasInteractions({
     handleBboxDragEnd,
     handleTransformEnd,
     getCursor,
+    isSpacePressed,
   }
 }

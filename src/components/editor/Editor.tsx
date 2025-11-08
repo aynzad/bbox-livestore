@@ -56,10 +56,24 @@ export function Editor({
     handleBboxDragEnd,
     handleTransformEnd,
     getCursor,
+    isSpacePressed,
   } = useCanvasInteractions({
     onAdd,
     onUpdate,
   })
+
+  // Update cursor dynamically
+  const cursor = getCursor()
+
+  // Update cursor style directly when space key state changes
+  useEffect(() => {
+    if (stageRef.current) {
+      const stageNode = stageRef.current.getStage()
+      if (stageNode) {
+        stageNode.container().style.cursor = cursor
+      }
+    }
+  }, [cursor, isSpacePressed])
 
   // Update transformer when selection changes
   useEffect(() => {
@@ -103,9 +117,19 @@ export function Editor({
 
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden bg-muted/20 w-full h-full"
+        className="flex-1 overflow-hidden bg-muted/10 w-full h-full relative"
       >
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle, var(--muted) 1.5px, transparent 1.5px)
+            `,
+            backgroundSize: '20px 20px',
+          }}
+        />
         <Stage
+          className="relative z-10"
           ref={stageRef}
           width={containerSize.width}
           height={containerSize.height}
@@ -113,7 +137,7 @@ export function Editor({
           onMouseMove={handleStageMouseMove}
           onMouseUp={handleStageMouseUp}
           onWheel={handleWheel}
-          style={{ cursor: getCursor() }}
+          style={{ cursor }}
         >
           <Layer>
             <CanvasContent

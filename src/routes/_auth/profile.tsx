@@ -2,7 +2,13 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAuthUser, resetAuthUserStore } from '@/store/authUser.store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { LogOut } from 'lucide-react'
 
 export const Route = createFileRoute('/_auth/profile')({
@@ -31,7 +37,7 @@ function ProfileComponent() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
         <p className="text-muted-foreground mt-1">
@@ -42,9 +48,7 @@ function ProfileComponent() {
       <Card>
         <CardHeader>
           <CardTitle>Account Information</CardTitle>
-          <CardDescription>
-            Your personal account details
-          </CardDescription>
+          <CardDescription>Your personal account details</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4">
@@ -75,4 +79,3 @@ function ProfileComponent() {
     </div>
   )
 }
-

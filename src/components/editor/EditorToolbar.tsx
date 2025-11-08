@@ -23,7 +23,7 @@ export function EditorToolbar({ onDelete }: EditorToolbarProps) {
   const reset = useEditorStore((state) => state.reset)
 
   return (
-    <div className="flex items-center gap-2 p-2 border-b bg-background">
+    <div className="flex items-center gap-2 p-4 border-b bg-muted">
       <Button
         variant={tool === 'select' ? 'default' : 'outline'}
         size="sm"
@@ -52,20 +52,10 @@ export function EditorToolbar({ onDelete }: EditorToolbarProps) {
         Pan
       </Button>
       <div className="w-px h-6 bg-border mx-1" />
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={zoomIn}
-        title="Zoom in"
-      >
+      <Button variant="outline" size="sm" onClick={zoomIn} title="Zoom in">
         <ZoomIn className="h-4 w-4" />
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={zoomOut}
-        title="Zoom out"
-      >
+      <Button variant="outline" size="sm" onClick={zoomOut} title="Zoom out">
         <ZoomOut className="h-4 w-4" />
       </Button>
       <Button
