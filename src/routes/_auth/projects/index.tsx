@@ -10,11 +10,16 @@ import {
   type ProjectWithCollaborators,
 } from '@/components/projectCard/ProjectCard'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Plus, Search, X } from 'lucide-react'
 import { UpsertProjectModal } from '@/components/addProjectModal/UpsertProjectModal'
 
 export const Route = createFileRoute('/_auth/projects/')({
   component: App,
+})
+
+export const uiStateQuery = queryDb(projectsSchema.tables.uiState.get(), {
+  label: 'uiState',
 })
 
 function App() {
@@ -23,7 +28,9 @@ function App() {
     ProjectWithCollaborators | undefined
   >(undefined)
   const user = useAuthUser()!
+
   const projectsStore = useStore(projectsStoreOptions(user.token))
+  const { searchQuery } = projectsStore.useQuery(uiStateQuery)
   const userProjects = projectsStore.useQuery(
     queryDb(
       projectsSchema.tables.projectsUsers
@@ -35,13 +42,17 @@ function App() {
 
   const projects = projectsStore.useQuery(
     queryDb(
-      projectsSchema.tables.projects
-        .where(
-          'id',
-          'IN',
-          userProjects as any, // IN operator requires string[] but types are not inferred correctly
-        )
-        .where('deletedAt', '=', null),
+      (get) => {
+        const { searchQuery } = get(uiStateQuery)
+        return projectsSchema.tables.projects
+          .where(
+            'id',
+            'IN',
+            userProjects as any, // IN operator requires string[] but types are not inferred correctly
+          )
+          .where('deletedAt', '=', null)
+          .where('name', 'LIKE', `%${searchQuery}%`)
+      },
       { label: 'visibleProjects', deps: userProjects },
     ),
   )
@@ -90,6 +101,16 @@ function App() {
     }
   }
 
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchQuery = e.target.value.trim().toLowerCase() || ''
+
+    projectsStore.commit(projectsSchema.events.uiStateSet({ searchQuery }))
+  }
+
+  const handleClearSearch = () => {
+    projectsStore.commit(projectsSchema.events.uiStateSet({ searchQuery: '' }))
+  }
+
   return (
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
@@ -105,7 +126,20 @@ function App() {
         </Button>
       </div>
 
-      {projects.length === 0 ? (
+      {(projectWithCollaborators.length > 0 || searchQuery !== '') && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search projects by name..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="pl-9"
+          />
+        </div>
+      )}
+
+      {projectWithCollaborators.length === 0 && searchQuery === '' ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
             <Plus className="h-8 w-8 text-muted-foreground" />
@@ -117,6 +151,21 @@ function App() {
           <Button onClick={handleCreateProject}>
             <Plus className="h-4 w-4" />
             Create Project
+          </Button>
+        </div>
+      ) : projectWithCollaborators.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+            <Search className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No projects found</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm">
+            No projects match your search query. Try adjusting your search
+            terms.
+          </p>
+          <Button variant="outline" size="sm" onClick={handleClearSearch}>
+            <X className="h-4 w-4" />
+            Clear Search
           </Button>
         </div>
       ) : (

@@ -1,10 +1,4 @@
-import {
-  Events,
-  makeSchema,
-  Schema,
-  SessionIdSymbol,
-  State,
-} from '@livestore/livestore'
+import { Events, makeSchema, Schema, State } from '@livestore/livestore'
 
 // You can model your state as SQLite tables (https://docs.livestore.dev/reference/state/sqlite-schema)
 const tables = {
@@ -27,14 +21,6 @@ const tables = {
         schema: Schema.DateFromNumber,
       }),
     },
-  }),
-  // Client documents can be used for local-only state (e.g. form inputs)
-  uiState: State.SQLite.clientDocument({
-    name: 'uiState',
-    schema: Schema.Struct({
-      query: Schema.String,
-    }),
-    default: { id: SessionIdSymbol, value: { query: '' } },
   }),
 }
 
@@ -67,8 +53,6 @@ const events = {
     name: 'v1.DeleteBbox',
     schema: Schema.Struct({ id: Schema.String, deletedAt: Schema.Date }),
   }),
-
-  uiStateSet: tables.uiState.set,
 }
 
 // Materializers are used to map events to state (https://docs.livestore.dev/reference/state/materializers)

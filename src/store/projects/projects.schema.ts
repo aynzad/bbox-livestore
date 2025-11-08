@@ -1,4 +1,10 @@
-import { Events, makeSchema, Schema, State } from '@livestore/livestore'
+import {
+  Events,
+  makeSchema,
+  Schema,
+  SessionIdSymbol,
+  State,
+} from '@livestore/livestore'
 
 // You can model your state as SQLite tables (https://docs.livestore.dev/reference/state/sqlite-schema)
 const tables = {
@@ -34,6 +40,14 @@ const tables = {
         columns: ['userId', 'projectId'],
       },
     ],
+  }),
+  // Client documents can be used for local-only state (e.g. form inputs)
+  uiState: State.SQLite.clientDocument({
+    name: 'uiState',
+    schema: Schema.Struct({
+      searchQuery: Schema.String,
+    }),
+    default: { id: SessionIdSymbol, value: { searchQuery: '' } },
   }),
 }
 
@@ -90,6 +104,7 @@ const events = {
       projectId: Schema.String,
     }),
   }),
+  uiStateSet: tables.uiState.set,
 }
 
 // Materializers are used to map events to state (https://docs.livestore.dev/reference/state/materializers)
