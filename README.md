@@ -41,8 +41,6 @@ Before running the application, you need to set up environment variables:
    wrangler secret put GOOGLE_CLIENT_SECRET --env prod
    ```
 
-   **Important:** Never commit secrets to version control. Always use Cloudflare Workers secrets for sensitive values.
-
 ### Running the Application
 
 To run this application:
@@ -58,4 +56,5 @@ To build this application for production:
 
 ```bash
 pnpm build
+wrangler deploy
 ```

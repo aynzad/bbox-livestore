@@ -1,8 +1,15 @@
 {
   "name": "bbox-livestore",
-  "private": true,
+  "private": false,
   "version": "0.0.1",
   "type": "module",
+  "author": "Alireza Esfahani <alireza@esfahani.dev>",
+  "license": "MIT",
+  "homepage": "https://bbox-livestore.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aynzad/bbox-livestore"
+  },
   "scripts": {
     "dev": "vite --port 3000",
     "build": "vite build && tsc",
