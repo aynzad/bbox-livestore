@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuthUser } from '@/store/authUser.store'
-import projectsSchema from '@/store/projects/projects.schema'
-import { projectsStoreOptions } from '@/store/projects/projects.store'
+import workspaceSchema from '@/store/workspace/workspace.schema'
+import { workspaceStoreOptions } from '@/store/workspace/workspace.store'
 import { queryDb } from '@livestore/livestore'
 import { useStore } from '@livestore/react/experimental'
 import { createFileRoute } from '@tanstack/react-router'
@@ -18,7 +18,7 @@ export const Route = createFileRoute('/_auth/projects/')({
   component: App,
 })
 
-export const uiStateQuery = queryDb(projectsSchema.tables.uiState.get(), {
+export const uiStateQuery = queryDb(workspaceSchema.tables.uiState.get(), {
   label: 'uiState',
 })
 
@@ -29,22 +29,22 @@ function App() {
   >(undefined)
   const user = useAuthUser()!
 
-  const projectsStore = useStore(projectsStoreOptions(user.token))
-  const { searchQuery } = projectsStore.useQuery(uiStateQuery)
-  const userProjects = projectsStore.useQuery(
+  const workspaceStore = useStore(workspaceStoreOptions(user.token))
+  const { searchQuery } = workspaceStore.useQuery(uiStateQuery)
+  const userProjects = workspaceStore.useQuery(
     queryDb(
-      projectsSchema.tables.projectsUsers
+      workspaceSchema.tables.projectsUsers
         .select('projectId')
         .where('userId', '=', user.id),
       { label: 'userProjects' },
     ),
   )
 
-  const projects = projectsStore.useQuery(
+  const projects = workspaceStore.useQuery(
     queryDb(
       (get) => {
         const { searchQuery } = get(uiStateQuery)
-        return projectsSchema.tables.projects
+        return workspaceSchema.tables.projects
           .where(
             'id',
             'IN',
@@ -57,9 +57,9 @@ function App() {
     ),
   )
 
-  const collaborators = projectsStore.useQuery(
+  const collaborators = workspaceStore.useQuery(
     queryDb(
-      projectsSchema.tables.projectsUsers.where(
+      workspaceSchema.tables.projectsUsers.where(
         'projectId',
         'IN',
         userProjects as any,
@@ -86,8 +86,8 @@ function App() {
   }
 
   const handleDeleteProject = (projectId: string) => {
-    projectsStore.commit(
-      projectsSchema.events.deleteProject({
+    workspaceStore.commit(
+      workspaceSchema.events.deleteProject({
         id: projectId,
         deletedAt: new Date(),
       }),
@@ -104,11 +104,13 @@ function App() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchQuery = e.target.value.trim().toLowerCase() || ''
 
-    projectsStore.commit(projectsSchema.events.uiStateSet({ searchQuery }))
+    workspaceStore.commit(workspaceSchema.events.uiStateSet({ searchQuery }))
   }
 
   const handleClearSearch = () => {
-    projectsStore.commit(projectsSchema.events.uiStateSet({ searchQuery: '' }))
+    workspaceStore.commit(
+      workspaceSchema.events.uiStateSet({ searchQuery: '' }),
+    )
   }
 
   return (

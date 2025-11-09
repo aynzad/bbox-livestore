@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import projectsSchema from '@/store/projects/projects.schema'
+import workspaceSchema from '@/store/workspace/workspace.schema'
 import { useAuthUser } from '@/store/authUser.store'
 import { useStore } from '@livestore/react/experimental'
-import { projectsStoreOptions } from '@/store/projects/projects.store'
+import { workspaceStoreOptions } from '@/store/workspace/workspace.store'
 import { queryDb } from '@livestore/livestore'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -46,18 +46,18 @@ function UpsertProjectModalInner({
   project,
 }: UpsertProjectModalProps) {
   const user = useAuthUser()!
-  const projectsStore = useStore(projectsStoreOptions(user.token))
+  const workspaceStore = useStore(workspaceStoreOptions(user.token))
 
   const isEditMode = !!project
 
   const adminId =
     project?.collaborators.find((collaborator) => collaborator.isAdmin)
       ?.userId || user.id
-  const users = projectsStore.useQuery(
+  const users = workspaceStore.useQuery(
     queryDb(
       isEditMode
-        ? projectsSchema.tables.users
-        : projectsSchema.tables.users.where('id', '!=', user.id),
+        ? workspaceSchema.tables.users
+        : workspaceSchema.tables.users.where('id', '!=', user.id),
       {
         deps: [user?.id, isEditMode ? 'edit' : 'create'],
       },
@@ -70,8 +70,8 @@ function UpsertProjectModalInner({
   )
 
   const onProjectCreated = (name: string, collaborators: string[]) => {
-    projectsStore.commit(
-      projectsSchema.events.createProject({
+    workspaceStore.commit(
+      workspaceSchema.events.createProject({
         id: crypto.randomUUID(),
         name: name,
         userId: user.id,
@@ -85,8 +85,8 @@ function UpsertProjectModalInner({
     name: string,
     collaborators: string[],
   ) => {
-    projectsStore.commit(
-      projectsSchema.events.updateProject({
+    workspaceStore.commit(
+      workspaceSchema.events.updateProject({
         id,
         name,
       }),
@@ -100,8 +100,8 @@ function UpsertProjectModalInner({
       (id) => !collaborators.includes(id) && id !== adminId,
     )
     toRemove.forEach((userId) => {
-      projectsStore.commit(
-        projectsSchema.events.removeUserFromProject({
+      workspaceStore.commit(
+        workspaceSchema.events.removeUserFromProject({
           userId,
           projectId: id,
         }),
@@ -111,8 +111,8 @@ function UpsertProjectModalInner({
     // Add new collaborators
     const toAdd = collaborators.filter((id) => !allCollaborators.includes(id))
     toAdd.forEach((userId) => {
-      projectsStore.commit(
-        projectsSchema.events.addUserToProject({
+      workspaceStore.commit(
+        workspaceSchema.events.addUserToProject({
           userId,
           projectId: id,
           isAdmin: false,

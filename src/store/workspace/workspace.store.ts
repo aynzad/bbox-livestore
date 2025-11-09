@@ -1,8 +1,8 @@
 import { storeOptions } from '@livestore/react/experimental'
-import projectsSchema from './projects.schema'
+import workspaceSchema from './workspace.schema'
 import { makePersistedAdapter } from '@livestore/adapter-web'
 import LiveStoreSharedWorker from '@livestore/adapter-web/shared-worker?sharedworker'
-import worker from './projects.worker?worker'
+import worker from './workspace.worker?worker'
 
 export const adapter = makePersistedAdapter({
   storage: { type: 'opfs' },
@@ -10,10 +10,10 @@ export const adapter = makePersistedAdapter({
   sharedWorker: LiveStoreSharedWorker,
 })
 
-export const projectsStoreOptions = (token: string) =>
+export const workspaceStoreOptions = (token: string) =>
   storeOptions({
-    storeId: 'projects-root',
-    schema: projectsSchema.schema,
+    storeId: 'workspace',
+    schema: workspaceSchema.schema,
     syncPayload: { authToken: token },
     adapter,
     gcTime: Number.POSITIVE_INFINITY, // Disable garbage collection

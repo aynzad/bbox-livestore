@@ -7,8 +7,8 @@ import {
 } from '@/store/authUser.store'
 import projectSchema from '@/store/project/project.schema'
 import { projectStoreOptions } from '@/store/project/project.store'
-import projectsSchema from '@/store/projects/projects.schema'
-import { projectsStoreOptions } from '@/store/projects/projects.store'
+import workspaceSchema from '@/store/workspace/workspace.schema'
+import { workspaceStoreOptions } from '@/store/workspace/workspace.store'
 import { queryDb } from '@livestore/livestore'
 import { useStore } from '@livestore/react/experimental'
 import { StoreRegistryProvider } from '@livestore/react/experimental'
@@ -30,12 +30,12 @@ export const Route = createFileRoute('/_auth/projects/$projectId')({
       projectStoreOptions(params.projectId, authUser.token),
     )
 
-    const projectsStore = await context.storeRegistry.getOrLoad(
-      projectsStoreOptions(authUser.token),
+    const workspaceStore = await context.storeRegistry.getOrLoad(
+      workspaceStoreOptions(authUser.token),
     )
 
-    const projectUser = projectsStore.query(
-      projectsSchema.tables.projectsUsers.where({
+    const projectUser = workspaceStore.query(
+      workspaceSchema.tables.projectsUsers.where({
         projectId: params.projectId,
         userId: authUser.id,
       }),

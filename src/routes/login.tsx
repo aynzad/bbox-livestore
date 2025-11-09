@@ -2,9 +2,15 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { CredentialResponse } from '@react-oauth/google'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { resetAuthUserStore, setAuthUser } from '@/store/authUser.store'
-import { projectsStoreOptions } from '@/store/projects/projects.store'
-import projectsSchema from '@/store/projects/projects.schema'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { workspaceStoreOptions } from '@/store/workspace/workspace.store'
+import workspaceSchema from '@/store/workspace/workspace.schema'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { FolderKanban } from 'lucide-react'
 
 export const Route = createFileRoute('/login')({
@@ -27,13 +33,13 @@ function RouteComponent() {
       .then(async (data) => {
         if (data.user) {
           setAuthUser({ ...data.user, token: data.token })
-          const projectsStore = await storeRegistry.getOrLoad(
-            projectsStoreOptions(data.token),
+          const workspaceStore = await storeRegistry.getOrLoad(
+            workspaceStoreOptions(data.token),
           )
 
           // TODO: should be done on server side
-          projectsStore.commit(
-            projectsSchema.events.createUser({
+          workspaceStore.commit(
+            workspaceSchema.events.createUser({
               id: data.user.id,
               email: data.user.email,
               name: data.user.name,
@@ -62,7 +68,9 @@ function RouteComponent() {
             <FolderKanban className="h-8 w-8" />
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold">Welcome to BBox LiveStore</CardTitle>
+            <CardTitle className="text-3xl font-bold">
+              Welcome to BBox LiveStore
+            </CardTitle>
             <CardDescription className="text-base">
               Sign in with Google to get started
             </CardDescription>

@@ -1,5 +1,5 @@
 import { getAuthUser, isAuthUserAuthenticated } from '@/store/authUser.store'
-import { projectsStoreOptions } from '@/store/projects/projects.store'
+import { workspaceStoreOptions } from '@/store/workspace/workspace.store'
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { ErrorFallback } from '@/components/errorFallback/ErrorFallback'
 import { Suspense } from 'react'
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/_auth/projects')({
       })
     }
 
-    context.storeRegistry.preload(projectsStoreOptions(authUser.token))
+    context.storeRegistry.preload(workspaceStoreOptions(authUser.token))
   },
   beforeLoad: () => {
     if (!isAuthUserAuthenticated()) {

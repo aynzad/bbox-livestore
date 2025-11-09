@@ -27,7 +27,7 @@ export default defineConfig({
     tailwindcss(),
     livestoreDevtoolsPlugin({
       schemaPath: [
-        './src/store/projects/projects.schema.ts',
+        './src/store/workspace/workspace.schema.ts',
         './src/store/project/project.schema.ts',
       ],
     }),
