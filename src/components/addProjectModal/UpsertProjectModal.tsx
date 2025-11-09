@@ -152,7 +152,7 @@ function UpsertProjectModalInner({
 
   const collaboratorOptions = users.map((user) => ({
     label: `${user.name} ${user.id === adminId ? '*' : ''}`,
-    description: `${user.email} ${user.id === adminId ? '(Admin)' : ''}`,
+    description: user.id === adminId ? 'Admin' : 'Collaborator',
     value: user.id,
   }))
 
