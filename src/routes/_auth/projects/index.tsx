@@ -123,14 +123,14 @@ function App() {
           </p>
         </div>
         <Button size="lg" onClick={handleCreateProject}>
-          <Plus className="h-4 w-4" />
+          <Plus className="size-4" />
           New Project
         </Button>
       </div>
 
       {(projectWithCollaborators.length > 0 || searchQuery !== '') && (
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search projects by name..."
@@ -151,7 +151,7 @@ function App() {
             Get started by creating your first project to organize your work.
           </p>
           <Button onClick={handleCreateProject}>
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             Create Project
           </Button>
         </div>
@@ -166,7 +166,7 @@ function App() {
             terms.
           </p>
           <Button variant="outline" size="sm" onClick={handleClearSearch}>
-            <X className="h-4 w-4" />
+            <X className="size-4" />
             Clear Search
           </Button>
         </div>

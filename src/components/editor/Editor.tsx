@@ -53,6 +53,9 @@ export function Editor({
     handleStageMouseDown,
     handleStageMouseMove,
     handleStageMouseUp,
+    handleStageTouchStart,
+    handleStageTouchMove,
+    handleStageTouchEnd,
     handleBboxDragEnd,
     handleTransformEnd,
     getCursor,
@@ -117,7 +120,8 @@ export function Editor({
 
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden bg-muted/10 w-full h-full relative"
+        className="flex-1 overflow-hidden bg-muted/10 w-full h-full relative touch-none"
+        style={{ touchAction: 'none' }}
       >
         <div
           className="absolute inset-0 pointer-events-none z-0"
@@ -136,8 +140,11 @@ export function Editor({
           onMouseDown={handleStageMouseDown}
           onMouseMove={handleStageMouseMove}
           onMouseUp={handleStageMouseUp}
+          onTouchStart={handleStageTouchStart}
+          onTouchMove={handleStageTouchMove}
+          onTouchEnd={handleStageTouchEnd}
           onWheel={handleWheel}
-          style={{ cursor }}
+          style={{ cursor, touchAction: 'none' }}
         >
           <Layer>
             <CanvasContent

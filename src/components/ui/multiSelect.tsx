@@ -124,13 +124,13 @@ const Option = ({
   >
     <div
       className={cn(
-        'mr-2 flex h-4 w-4 items-center justify-center [&_svg]:!text-current',
+        'mr-2 flex size-4 items-center justify-center [&_svg]:!text-current',
       )}
     >
       <Checkbox checked={isSelected} />
     </div>
     {option.icon && (
-      <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+      <option.icon className="mr-2 size-4 text-muted-foreground" />
     )}
     <span>{option.label}</span>
     {option.description && (
@@ -274,7 +274,7 @@ export const MultiSelect = React.forwardRef<HTMLInputElement, MultiSelectProps>(
                           className="bg-card text-xs text-foreground transition-transform delay-150 duration-300 ease-in-out group-aria-disabled:opacity-30 hover:scale-110 hover:bg-card/80"
                         >
                           {IconComponent && (
-                            <IconComponent className="mr-2 h-4 w-4" />
+                            <IconComponent className="mr-2 size-4" />
                           )}
                           {option?.label}
                           <Button

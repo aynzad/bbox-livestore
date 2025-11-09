@@ -70,7 +70,7 @@ function ProfileComponent() {
               onClick={handleLogout}
               className="w-full sm:w-auto"
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="size-4 mr-2" />
               Logout
             </Button>
           </div>

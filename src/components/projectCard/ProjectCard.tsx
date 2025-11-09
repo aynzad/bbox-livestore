@@ -111,14 +111,14 @@ export function ProjectCard({
                       className="h-8 w-8"
                       onClick={handleMenuClick}
                     >
-                      <MoreVertical className="h-4 w-4" />
+                      <MoreVertical className="size-4" />
                       <span className="sr-only">Open menu</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" onClick={handleMenuClick}>
                     {canEdit && (
                       <DropdownMenuItem onClick={handleEditClick}>
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="size-4" />
                         Edit
                       </DropdownMenuItem>
                     )}
@@ -127,7 +127,7 @@ export function ProjectCard({
                         variant="destructive"
                         onClick={handleDeleteClick}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="size-4" />
                         {isConfirmingDelete ? 'Confirm Delete?' : 'Delete'}
                       </DropdownMenuItem>
                     )}

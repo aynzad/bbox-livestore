@@ -158,7 +158,7 @@ function UpsertProjectModalInner({
 
   return (
     <Modal open={open} onOpenChange={handleOpenChange}>
-      <ModalContent className="sm:max-w-[500px]">
+      <ModalContent className="sm:max-w-[500px] px-4">
         <ModalHeader>
           <ModalTitle>
             {isEditMode ? 'Edit Project' : 'Create New Project'}

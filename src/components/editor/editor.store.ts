@@ -22,12 +22,14 @@ interface EditorState {
   tempBbox: { x: number; y: number; width: number; height: number } | null
   setIsDrawing: (isDrawing: boolean) => void
   setDrawStart: (drawStart: { x: number; y: number } | null) => void
-  setTempBbox: (tempBbox: {
-    x: number
-    y: number
-    width: number
-    height: number
-  } | null) => void
+  setTempBbox: (
+    tempBbox: {
+      x: number
+      y: number
+      width: number
+      height: number
+    } | null,
+  ) => void
 
   // Panning state
   isPanning: boolean
@@ -45,7 +47,7 @@ interface EditorState {
 export const useEditorStore = create<EditorState>((set) => ({
   // Tool selection
   tool: 'select',
-  setTool: (tool) => set({ tool }),
+  setTool: (tool) => set({ tool, selectedId: null }),
 
   // Selection
   selectedId: null,
@@ -88,4 +90,3 @@ export const useEditorStore = create<EditorState>((set) => ({
       selectedId: null,
     }),
 }))
-
