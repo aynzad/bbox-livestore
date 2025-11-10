@@ -26,10 +26,6 @@ export const Route = createFileRoute('/_auth/projects/$projectId')({
       })
     }
 
-    await context.storeRegistry.preload(
-      projectStoreOptions(params.projectId, authUser.token),
-    )
-
     const workspaceStore = await context.storeRegistry.getOrLoad(
       workspaceStoreOptions(authUser.token),
     )
@@ -46,6 +42,10 @@ export const Route = createFileRoute('/_auth/projects/$projectId')({
         to: '/projects',
       })
     }
+
+    context.storeRegistry.preload(
+      projectStoreOptions(params.projectId, authUser.token),
+    )
   },
   beforeLoad: () => {
     if (!isAuthUserAuthenticated()) {
