@@ -85,64 +85,57 @@ export function ProjectCard({
   const canEdit = typeof onEdit !== 'undefined'
 
   return (
-    <div
-      className={cn('block transition-transform hover:scale-[1.02]', className)}
-    >
-      <Card className="h-full cursor-pointer transition-all hover:border-primary/50">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/projects/$projectId"
-              params={{ projectId: id }}
-              className="flex items-center gap-3 flex-1 min-w-0"
-            >
+    <Link to="/projects/$projectId" params={{ projectId: id }} className=" ">
+      <div
+        className={cn(
+          'block transition-transform hover:scale-[1.02]',
+          className,
+        )}
+      >
+        <Card className="h-full cursor-pointer transition-all hover:border-primary/50">
+          <CardHeader>
+            <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
                 <FolderKanban className="h-5 w-5" />
               </div>
               <CardTitle className="line-clamp-2 flex-1">{name}</CardTitle>
-            </Link>
-            {(canEdit || canDelete) && (
-              <div onClick={handleMenuClick} className="shrink-0">
-                <DropdownMenu onOpenChange={onDropdownMenuOpenChange}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={handleMenuClick}
-                    >
-                      <MoreVertical className="size-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" onClick={handleMenuClick}>
-                    {canEdit && (
-                      <DropdownMenuItem onClick={handleEditClick}>
-                        <Pencil className="size-4" />
-                        Edit
-                      </DropdownMenuItem>
-                    )}
-                    {canDelete && (
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={handleDeleteClick}
+              {(canEdit || canDelete) && (
+                <div onClick={handleMenuClick} className="shrink-0">
+                  <DropdownMenu onOpenChange={onDropdownMenuOpenChange}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={handleMenuClick}
                       >
-                        <Trash2 className="size-4" />
-                        {isConfirmingDelete ? 'Confirm Delete?' : 'Delete'}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Link
-            to="/projects/$projectId"
-            params={{ projectId: id }}
-            className="block"
-          >
+                        <MoreVertical className="size-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" onClick={handleMenuClick}>
+                      {canEdit && (
+                        <DropdownMenuItem onClick={handleEditClick}>
+                          <Pencil className="size-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {canDelete && (
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={handleDeleteClick}
+                        >
+                          <Trash2 className="size-4" />
+                          {isConfirmingDelete ? 'Confirm Delete?' : 'Delete'}
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
             <p className="text-sm text-muted-foreground flex items-center gap-2">
               {isAdmin ? (
                 <TooltipProvider>
@@ -160,9 +153,9 @@ export function ProjectCard({
               )}{' '}
               Click to open project
             </p>
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </Link>
   )
 }
