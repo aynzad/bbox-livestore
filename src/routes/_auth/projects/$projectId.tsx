@@ -1,10 +1,6 @@
 import { ErrorFallback } from '@/components/errorFallback/ErrorFallback'
 import { Editor } from '@/components/editor'
-import {
-  getAuthUser,
-  isAuthUserAuthenticated,
-  useAuthUser,
-} from '@/store/authUser.store'
+import { getAuthUser, useAuthUser } from '@/store/authUser.store'
 import projectSchema from '@/store/project/project.schema'
 import { projectStoreOptions } from '@/store/project/project.store'
 import workspaceSchema from '@/store/workspace/workspace.schema'
