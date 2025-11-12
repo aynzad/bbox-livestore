@@ -26,6 +26,19 @@ export const Route = createFileRoute('/_auth/projects/$projectId')({
       })
     }
 
+    context.storeRegistry.preload(
+      projectStoreOptions(params.projectId, authUser.token),
+    )
+  },
+  beforeLoad: async ({ context, params }) => {
+    const authUser = getAuthUser()
+
+    if (!authUser || !authUser.token) {
+      throw redirect({
+        to: '/login',
+      })
+    }
+
     const workspaceStore = await context.storeRegistry.getOrLoad(
       workspaceStoreOptions(authUser.token),
     )
@@ -40,17 +53,6 @@ export const Route = createFileRoute('/_auth/projects/$projectId')({
     if (!projectUser || projectUser.length === 0) {
       throw redirect({
         to: '/projects',
-      })
-    }
-
-    context.storeRegistry.preload(
-      projectStoreOptions(params.projectId, authUser.token),
-    )
-  },
-  beforeLoad: () => {
-    if (!isAuthUserAuthenticated()) {
-      throw redirect({
-        to: '/login',
       })
     }
   },
